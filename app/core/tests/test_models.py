@@ -3,7 +3,8 @@ Tests for models.
 """
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from core.models import User
+from core import models
+from decimal import Decimal
 
 
 class ModelTests(TestCase):
@@ -13,7 +14,7 @@ class ModelTests(TestCase):
         """Test creating a user with an email is successful."""
         email = "test@example.com"
         password = "testpass123"
-        user: User = get_user_model().objects.create_user(
+        user: models.User = get_user_model().objects.create_user(
             email=email,
             password=password,
         )
@@ -31,7 +32,7 @@ class ModelTests(TestCase):
         ]
 
         for email, expected in sample_emails:
-            user: User = get_user_model().objects.create_user(
+            user: models.User = get_user_model().objects.create_user(
               email=email,
               password='sample123'
             )
@@ -48,7 +49,7 @@ class ModelTests(TestCase):
     def test_create_superuser(self):
         """Test creating a superuser."""
         email = "superuser@example.com"
-        user: User = get_user_model().objects.create_superuser(
+        user: models.User = get_user_model().objects.create_superuser(
           email=email,
           password="superpass123",
         )
@@ -57,3 +58,20 @@ class ModelTests(TestCase):
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
         self.assertTrue(user.is_active)
+
+    def test_create_recipe(self):
+        """Test creating a recipe is successful."""
+        user = get_user_model().objects.create_user(
+          'test@example.com',
+          'testpass123',
+        )
+
+        recipe = models.Recipe.objects.create(
+          user=user,
+          title='Sample Recipe',
+          time_minutes=5,
+          price=Decimal('5.50'),
+          description='Sample recipe description',
+        )
+
+        self.assertEqual(str(recipe), recipe.title)
