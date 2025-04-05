@@ -19,6 +19,9 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+# Check if we're in development mode
+IS_DEV = os.getenv('DJANGO_ENV', '').lower() == 'development'
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -88,9 +91,6 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# Check if we're in development mode
-IS_DEV = os.getenv('DJANGO_ENV', '').lower() == 'development'
-
 if IS_DEV:
     # Use SQLite for development
     DATABASES = {
@@ -124,17 +124,17 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': (
-          'django.contrib.auth.password_validation.MinimumLengthValidator'
+            'django.contrib.auth.password_validation.MinimumLengthValidator'
         ),
     },
     {
         'NAME': (
-          'django.contrib.auth.password_validation.CommonPasswordValidator'
+            'django.contrib.auth.password_validation.CommonPasswordValidator'
         ),
     },
     {
         'NAME': (
-          'django.contrib.auth.password_validation.NumericPasswordValidator'
+            'django.contrib.auth.password_validation.NumericPasswordValidator'
         ),
     },
 ]
@@ -156,8 +156,18 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
+if IS_DEV:
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
 
-STATIC_URL = '/static/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+else:
+    STATIC_URL = '/static/static/'
+    MEDIA_URL = '/static/media/'
+
+    MEDIA_ROOT = '/vol/web/media'
+    STATIC_ROOT = '/vol/web/static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -169,4 +179,8 @@ AUTH_USER_MODEL = 'core.User'
 # REST Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'COMPONENT_SPLIT_REQUEST': True
 }
