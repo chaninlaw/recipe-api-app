@@ -5,3 +5,4 @@ drf-spectacular>=0.28
 python-dotenv>=1.0
 flake8>=3.9.2,<3.10
 Pillow>=11.1.0
+quill-delta>=1.0.3

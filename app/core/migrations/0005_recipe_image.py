@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             model_name="recipe",
             name="image",
             field=models.ImageField(
-                null=True, upload_to=core.models.recipe_image_file_path
+                null=True, upload_to=core.utils.recipe_image_file_path
             ),
         ),
     ]

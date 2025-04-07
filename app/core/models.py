@@ -1,8 +1,6 @@
 """
 Database models.
 """
-import uuid
-import os
 
 from django.conf import settings
 from django.db import models
@@ -12,12 +10,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 
-
-def recipe_image_file_path(instance, filename):
-    """Generate file path for new recipe image."""
-    (_, ext) = os.path.splitext(filename)
-    filename = f'{uuid.uuid4()}{ext}'
-    return os.path.join('uploads', 'recipe', filename)
+from core import utils
 
 
 class UserManager(BaseUserManager):
@@ -72,7 +65,8 @@ class Recipe(models.Model):
     link = models.CharField(max_length=255, blank=True)
     tags = models.ManyToManyField('Tag')
     ingredients = models.ManyToManyField('Ingredient')
-    image = models.ImageField(null=True, upload_to=recipe_image_file_path)
+    image = models.ImageField(
+        null=True, upload_to=utils.recipe_image_file_path)
 
     def __str__(self):
         """Display in admin."""
@@ -103,3 +97,30 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class PostFile(models.Model):
+    """Model to represent individual files for a post."""
+    file = models.FileField(upload_to=utils.post_content_file_path,
+                            null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.file.name
+
+
+class Post(models.Model):
+    """Post model."""
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+
+    title = models.CharField(max_length=255)
+    content = models.JSONField()
+    content_files = models.ManyToManyField(PostFile)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title

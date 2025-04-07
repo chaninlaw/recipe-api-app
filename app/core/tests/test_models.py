@@ -7,7 +7,7 @@ from decimal import Decimal
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
-from core import models
+from core import models, utils
 
 
 def create_test_user(**params) -> models.User:
@@ -106,11 +106,30 @@ class ModelTests(TestCase):
 
         self.assertEqual(str(ingredient), ingredient.name)
 
-    @patch('core.models.uuid.uuid4')
+    @patch('uuid.uuid4')
     def test_recipe_file_name_uuid(self, mock_uuid):
         """Test generating image path."""
         uuid = 'test-uuid'
         mock_uuid.return_value = uuid
-        file_path = models.recipe_image_file_path(None, 'example.jpg')
+        recipe = models.Recipe.objects.create(
+            user=create_test_user(),
+            title='Sample Recipe',
+            time_minutes=5,
+            price=Decimal('5.50'),
+            description='Sample recipe description',
+        )
+        file_path = utils.recipe_image_file_path(recipe, 'example.jpg')
 
-        self.assertEqual(file_path, f'uploads/recipe/{uuid}.jpg')
+        self.assertEqual(file_path, f'uploads/recipe/{recipe.id}/{uuid}.jpg')
+
+    def test_create_post(self):
+        """Test creating a post is successful."""
+
+        user = create_test_user()
+        post = models.Post.objects.create(
+            author=user,
+            title='Sample Post',
+            content='Sample post content',
+        )
+
+        self.assertEqual(str(post), post.title)
